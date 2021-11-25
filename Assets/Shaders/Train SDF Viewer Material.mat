@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Train SDF Viewer Material
+  m_Shader: {fileID: -6465566751694194690, guid: af4cb9d0f23b58848a2c5de1e56e82c1, type: 3}
+  m_ShaderKeywords: LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK_1 _ADDITIONAL_LIGHT
+    _ADDITIONAL_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _SHADOWS_SOFT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _ColorRamp:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SDFTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - LIGHTMAP_SHADOW_MIXING: 1
+    - SHADOWS_SHADOWMASK_1: 1
+    - _ADDITIONAL_LIGHT: 1
+    - _ADDITIONAL_LIGHT_SHADOWS: 1
+    - _Alpha: 0.02
+    - _AlphaClip: 1
+    - _Blend: 0
+    - _CastShadows: 0
+    - _Cull: 1
+    - _DstBlend: 0
+    - _InvResolution: 0.01
+    - _IsNormalMap: 0
+    - _MAIN_LIGHT_SHADOWS: 1
+    - _MAIN_LIGHT_SHADOWS_CASCADE: 1
+    - _MAIN_LIGHT_SHADOWS_CASCADE_1: 1
+    - _MAIN_LIGHT_SHADOWS_SCREEN: 1
+    - _Metallic: 0
+    - _Offset: 0
+    - _QueueControl: 1
+    - _QueueOffset: 0
+    - _REFLECTION_PROBE_BLENDING: 1
+    - _SDFScale: 1
+    - _SHADOWS_SOFT: 1
+    - _Scale: 1
+    - _Smoothness: 0.5
+    - _SrcBlend: 1
+    - _StepSize: 0.01
+    - _Surface: 0
+    - _ZTest: 4
+    - _ZWrite: 1
+    - _ZWriteControl: 0
+    m_Colors:
+    - _Color: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+    - _Emission: {r: 0, g: 0, b: 0, a: 0}
+    - _GlobalScale: {r: 1, g: 1, b: 1, a: 1}
+    - _InvScale: {r: 1, g: 1, b: 1, a: 1}
+    - _SDFOffset: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+    - _Specular: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _VoxelSize: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+--- !u!114 &4152506569704309522
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 5

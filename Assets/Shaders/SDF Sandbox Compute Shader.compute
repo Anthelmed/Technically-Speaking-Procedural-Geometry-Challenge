@@ -1,0 +1,179 @@
+#pragma kernel CSMain
+
+#define MAX_DISTANCE 500
+#define MIN_DISTANCE 0.001
+
+struct Shape
+{
+    float3 color;
+    int useColor;
+    float3 position;
+    float3 rotation;
+    float3 scale;
+    float blend;
+    float blendColor;
+    int geometry;
+    int operation;
+};
+
+RWTexture3D<float4> Texture;
+StructuredBuffer<Shape> ShapesBuffer;
+int TextureSize;
+int ShapesCount;
+float3 ViewerScale;
+
+float Sphere( float3 p, float s )
+{
+    return length(p)-s;
+}
+
+float Ellipsoid( float3 p, float3 r )
+{
+    float k0 = length(p/r);
+    float k1 = length(p/(r*r));
+    return k0*(k0-1.0)/k1;
+}
+
+float Box( float3 p, float3 b )
+{
+    float3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+float RoundBox( float3 p, float3 b, float r )
+{
+    float3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
+}
+
+float RoundedCylinder( float3 p, float ra, float rb, float h )
+{
+    float2 d = float2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
+    return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
+}
+
+float SmoothUnion( float d1, float d2, float k )
+{
+    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return lerp( d2, d1, h ) - k*h*(1.0-h);
+}
+
+float3 SmoothColor( float d1, float d2, float3 c1, float3 c2, float k )
+{
+    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return lerp( c2, c1, h );
+}
+
+float SmoothSubtraction( float d1, float d2, float k )
+{
+    float h = clamp( 0.5 - 0.5*(d2+d1)/k, 0.0, 1.0 );
+    return lerp( d2, -d1, h ) + k*h*(1.0-h);
+}
+
+float SmoothIntersection( float d1, float d2, float k )
+{
+    float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return lerp( d2, d1, h ) + k*h*(1.0-h);
+}
+
+float InverseLerp(float from, float to, float value){
+    return (value - from) / (to - from);
+}
+
+float Remap(float origFrom, float origTo, float targetFrom, float targetTo, float value){
+    float rel = InverseLerp(origFrom, origTo, value);
+    return lerp(targetFrom, targetTo, rel);
+}
+
+// Rotation matrix around the X axis.
+float3x3 RotateX(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return float3x3(
+        float3(1, 0, 0),
+        float3(0, c, -s),
+        float3(0, s, c)
+    );
+}
+
+// Rotation matrix around the Y axis.
+float3x3 RotateY(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return float3x3(
+        float3(c, 0, s),
+        float3(0, 1, 0),
+        float3(-s, 0, c)
+    );
+}
+
+// Rotation matrix around the Z axis.
+float3x3 RotateZ(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return float3x3(
+        float3(c, -s, 0),
+        float3(s, c, 0),
+        float3(0, 0, 1)
+    );
+}
+
+float Geometry(float3 position, Shape shape)
+{
+    float3 shapePosition = position + (shape.position * -1);
+    shapePosition = mul(shapePosition, RotateX(shape.rotation.x));
+    shapePosition = mul(shapePosition, RotateY(shape.rotation.y));
+    shapePosition = mul(shapePosition, RotateZ(shape.rotation.z));
+    
+    switch (shape.geometry)
+    {
+        case 0:
+            return Ellipsoid(shapePosition, shape.scale);
+        case 1:
+            return RoundBox(shapePosition, shape.scale, 0.001);
+        case 2:
+            return RoundedCylinder(shapePosition, length(shape.scale.xz), 0.001, shape.scale.y);
+    }
+    
+    return 0;
+}
+
+float Operation(float d1, float d2, float blend, int operation)
+{
+    switch (operation)
+    {
+        case 0:
+            return SmoothUnion(d1, d2, blend);
+        case 1:
+            return SmoothSubtraction(d1, d2, blend);
+        case 2:
+            return SmoothIntersection(d1, d2, blend);
+    }
+
+    return SmoothUnion(d1, d2, blend);
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 position = float3(Remap(0, TextureSize, -0.5, 0.5, id.x), Remap(0, TextureSize, -0.5, 0.5, id.y), Remap(0, TextureSize, -0.5, 0.5, id.z));
+
+    Shape shape = ShapesBuffer[0];
+    float dist = Geometry(position, shape);
+    float3 color = shape.color;
+
+    for (int i = 1; i < ShapesCount; i++)
+    {
+        Shape shape = ShapesBuffer[i];
+        float dist1 = Geometry(position, shape);
+        float3 color1 = shape.color;
+
+        if (shape.useColor == 1)
+            color = SmoothColor(dist1, dist, color1, color, shape.blendColor);
+
+        dist = Operation(dist1, dist, shape.blend, shape.operation);
+    }
+    
+    
+    Texture[id.xyz] = float4(color.x, color.y, color.z, dist);
+}
